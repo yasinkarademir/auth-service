@@ -1,0 +1,43 @@
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+**/mvnw
+**/mvnw.cmd
+**/.mvn/wrapper
+
+# Spring Boot
+*.pid
+*.gz
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Gradle
+.gradle/
+build/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Others
+*.swp
+*~
