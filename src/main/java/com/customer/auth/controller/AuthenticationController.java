@@ -1,5 +1,6 @@
 package com.customer.auth.controller;
 
+import com.customer.auth.model.Token;
 import com.customer.auth.model.User;
 import com.customer.auth.service.AuthenticationService;
 import org.springframework.http.HttpStatus;
@@ -16,16 +17,21 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        System.out.println(user.getUsername());
-        String token = authenticationService.registerUser(user.getUsername(), user.getPassword());
-        return token != null ? ResponseEntity.ok(token) : ResponseEntity.badRequest().body("UserName already exist!");
+    public ResponseEntity<Token> register(@RequestBody User user) {
+        Token token = authenticationService.registerUser(user.getUsername(), user.getPassword());
+        return token != null ? ResponseEntity.ok(token) : ResponseEntity.badRequest().body(null);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        String token = authenticationService.loginUser(user.getUsername(), user.getPassword());
-        return token != null ? ResponseEntity.ok(token) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+    public ResponseEntity<Token> login(@RequestBody User user) {
+        Token token = authenticationService.loginUser(user.getUsername(), user.getPassword());
+        return token != null ? ResponseEntity.ok(token) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Token> refresh(@RequestBody Token token) {
+        Token newToken = authenticationService.refreshToken(token);
+        return newToken != null ? ResponseEntity.ok(newToken) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
     @GetMapping("/verify")

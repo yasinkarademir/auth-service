@@ -1,10 +1,12 @@
 package com.customer.auth.service;
 
+import com.customer.auth.model.Token;
 import com.customer.auth.model.User;
 import com.customer.auth.repository.UserRepository;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -20,7 +22,7 @@ public class AuthenticationService {
         this.tokenService = tokenService;
     }
 
-    public String registerUser(String userName, String password) {
+    public Token registerUser(String userName, String password) {
         if (userRepository.getUserById(userName) == null) {
             User user = new User();
             user.setUsername(userName);
@@ -32,15 +34,33 @@ public class AuthenticationService {
         return null;
     }
 
-    public String loginUser(String userName, String password) {
+    public Token loginUser(String userName, String password) {
         User user = userRepository.getUserById(userName);
-        if (user.getUsername() != "") {
+        if (!Objects.equals(user.getUsername(), "")) {
             String hashedPassword = hashPassword(password);
             if (hashedPassword.equals(user.getPassword())) {
                 String token = generateToken();
+                String refreshToken = generateToken();
                 tokenService.saveToken(token, userName);
-                return token;
+                tokenService.saveRefreshToken(refreshToken, userName);
+
+                return new Token(token, refreshToken, userName);
             }
+        }
+        return null;
+    }
+
+    public Token refreshToken(Token oldToken) {
+        boolean isValid = tokenService.isRefTokenValid(oldToken.getRefreshToken());
+        if (isValid) {
+            String userName = oldToken.getUserName();
+            String token = generateToken();
+            String newRefreshToken = generateToken();
+            Token newToken = new Token(token, newRefreshToken, userName);
+            tokenService.saveToken(token, userName);
+            tokenService.saveRefreshToken(newRefreshToken, userName);
+            tokenService.invalidateToken(oldToken.getToken(), oldToken.getRefreshToken());
+            return newToken;
         }
         return null;
     }
